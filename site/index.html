@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Class Materials</title>
+  <meta name="description" content="Slides and PDFs for class, grouped by grade and topic.">
+  <meta name="robots" content="noindex">
+  <meta name="referrer" content="no-referrer">
+
+  <!-- Add to Home Screen (Android and iPhone) -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#14181f">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Materials">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+  <script>
+    // Apply the saved light/dark choice before the page draws, to avoid a flash.
+    try {
+      if (localStorage.getItem("theme") === "light") {
+        document.documentElement.dataset.theme = "light";
+      }
+    } catch (e) {}
+  </script>
+  <link rel="stylesheet" href="style.css?v=dev">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-row">
+      <a class="site-name" href="#/">Class Materials</a>
+      <button type="button" id="theme-button" class="btn btn-quiet">Light mode</button>
+    </div>
+  </header>
+
+  <main class="wrap" id="main">
+    <label class="search-label" for="search">Search all files by name</label>
+    <div class="search-row">
+      <input id="search" type="search" placeholder="For example: fractions" autocomplete="off" spellcheck="false" enterkeyhint="search">
+      <button type="button" id="clear-search" class="btn btn-quiet" hidden>Clear search</button>
+    </div>
+
+    <div id="view" aria-live="polite">
+      <p class="note">Loading the list of materials…</p>
+    </div>
+  </main>
+
+  <footer class="wrap foot">
+    <p id="updated"></p>
+  </footer>
+
+  <script src="app.js?v=dev"></script>
+</body>
+</html>

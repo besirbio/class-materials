@@ -1,0 +1,55 @@
+name: Publish site
+
+# Runs every time something changes on the main branch (for example, when a
+# file is uploaded, renamed or deleted on github.com). Can also be run by hand
+# from the Actions tab with "Run workflow".
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# If several changes arrive close together, only the newest one is published.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get the files
+        uses: actions/checkout@v4
+
+      - name: Build the site
+        run: |
+          mkdir _site
+          cp -R site/. _site/
+          cp -R materials _site/materials
+          node .github/scripts/build-list.mjs materials _site/files.json
+          # Put this change's id on the script and stylesheet links so
+          # phones load the new versions instead of old saved copies.
+          sed -i "s/?v=dev/?v=${GITHUB_SHA::8}/g" _site/index.html
+
+      - name: Prepare GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publish to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
