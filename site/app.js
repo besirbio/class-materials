@@ -1,5 +1,10 @@
 "use strict";
 
+// The version this script was loaded as, taken from its own address
+// (app.js?v=12 gives 12). Must be read here, while the script first runs.
+const RUNNING_VERSION =
+  +(/[?&]v=(\d+)/.exec(document.currentScript ? document.currentScript.src : "") || [])[1] || 0;
+
 // Class Materials: shows the list in files.json as grades → topics → files.
 // No accounts, no tracking, no outside services. The only thing saved on the
 // device is the light/dark choice.
@@ -195,6 +200,29 @@ async function load(quiet) {
   }
 }
 
+/* ---------- Updating to a newer version of the site ---------- */
+
+// Phones (especially iPhone home-screen apps) can keep showing an old saved
+// copy of the page. Fetch the page fresh, read its version number, and reload
+// once if it is newer than the one running.
+async function checkForNewVersion() {
+  if (!RUNNING_VERSION || !/^https?:/.test(location.protocol)) return;
+  try {
+    // "reload" goes to the network and also replaces the saved copy of the page.
+    const page = await (await fetch(location.pathname, { cache: "reload" })).text();
+    const latest = +(/app\.js\?v=(\d+)/.exec(page) || [])[1] || 0;
+    let tried = null;
+    try { tried = sessionStorage.getItem("site.tried"); } catch (e) {}
+    if (latest > RUNNING_VERSION && tried !== String(latest)) {
+      // One try per version, so a stubborn saved copy can never cause a loop.
+      try { sessionStorage.setItem("site.tried", String(latest)); } catch (e) { return; }
+      location.reload();
+    }
+  } catch (e) {
+    // Offline: carry on with what is here.
+  }
+}
+
 /* ---------- Light / dark ---------- */
 
 function updateThemeButton() {
@@ -225,8 +253,12 @@ window.addEventListener("hashchange", () => {
 // When a student comes back to the site (for example from the home screen),
 // fetch the list again so new files show up.
 document.addEventListener("visibilitychange", () => {
-  if (document.visibilityState === "visible") load(true);
+  if (document.visibilityState === "visible") {
+    load(true);
+    checkForNewVersion();
+  }
 });
 
 updateThemeButton();
 load(false);
+checkForNewVersion();

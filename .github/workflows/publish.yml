@@ -31,9 +31,10 @@ jobs:
           cp -R site/. _site/
           cp -R materials _site/materials
           node .github/scripts/build-list.mjs materials _site/files.json
-          # Put this change's id on the script and stylesheet links so
-          # phones load the new versions instead of old saved copies.
-          sed -i "s/?v=dev/?v=${GITHUB_SHA::8}/g" _site/index.html
+          # Put a version number on the script and stylesheet links so phones
+          # load the new versions. The run number goes up with every publish,
+          # and the site uses it to notice that a newer version exists.
+          sed -i "s/?v=dev/?v=${GITHUB_RUN_NUMBER}/g" _site/index.html
 
       - name: Prepare GitHub Pages
         uses: actions/configure-pages@v5
